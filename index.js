@@ -26,9 +26,34 @@ async function run() {
     try {
 
         const database = client.db("NishiBartaDB");
+        const users = database.collection("userList");
         const usersCollectionMenu = database.collection("menu");
         const usersCollectionAllNews = database.collection("allNews");
         const usersCollectionAdminMenu = database.collection("adminMenu");
+
+        app.get('/user-list', async (req, res) => {
+            const cursor = users.find()
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+        app.post('/user-list', async (req, res) => {
+            const user = req.body;
+            console.log('User Add', user);
+            const result = await users.insertOne(user);
+            res.send(result);
+        })
+        app.get('/user-details/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const product = await users.findOne(query);
+            res.send(product);
+        })
+        app.get('/user-list/:username', async (req, res) => {
+            const username = req.params.username;
+            const query = { username: username }
+            const product = await users.findOne(query);
+            res.send(product);
+        })
 
         app.get('/menu', async (req, res) => {
             const cursor = usersCollectionMenu.find()
@@ -53,6 +78,38 @@ async function run() {
             const news = req.body;
             console.log('new news', news);
             const result = await usersCollectionAllNews.insertOne(news);
+            res.send(result);
+        })
+        app.patch('/news/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updateUser = req.body;
+            console.log(query);
+            const updateDoc = {
+                $set: {
+                    status: updateUser.status,
+                    operationBy: updateUser.operationBy,
+                    operationTime: updateUser.operationTime,
+                }
+            }
+            const result = await usersCollectionAllNews.updateOne(query, updateDoc);
+            console.log(result);
+            res.send(result);
+        })
+        app.patch('/delete-news/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updateUser = req.body;
+            console.log(query);
+            const updateDoc = {
+                $set: {
+                    deleteStatus: updateUser.deleteStatus,
+                    deletedBy: updateUser.deletedBy,
+                    deletedTime: updateUser.deletedTime,
+                }
+            }
+            const result = await usersCollectionAllNews.updateOne(query, updateDoc);
+            console.log(result);
             res.send(result);
         })
 
