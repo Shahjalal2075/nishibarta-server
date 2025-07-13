@@ -61,6 +61,13 @@ async function run() {
             res.send(result);
         })
 
+        app.get('/menu/:category', async (req, res) => {
+            const category = req.params.category;
+            const query = { link: category }
+            const product = await usersCollectionMenu.findOne(query);
+            res.send(product);
+        })
+
         app.get('/news', async (req, res) => {
             const cursor = usersCollectionAllNews.find()
             const result = await cursor.toArray();
@@ -74,6 +81,23 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result);
         })
+
+        app.get('/news/:category/:id', async (req, res) => {
+            const category = req.params.category;
+            const id = req.params.id;
+            const query = { category: category, journalist: id }
+            const cursor = usersCollectionAllNews.find(query);
+            const result = await cursor.toArray();
+            res.send(result);
+        })
+
+        app.get('/news-details/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const product = await usersCollectionAllNews.findOne(query);
+            res.send(product);
+        })
+
         app.post('/news', async (req, res) => {
             const news = req.body;
             console.log('new news', news);
@@ -90,6 +114,39 @@ async function run() {
                     status: updateUser.status,
                     operationBy: updateUser.operationBy,
                     operationTime: updateUser.operationTime,
+                }
+            }
+            const result = await usersCollectionAllNews.updateOne(query, updateDoc);
+            console.log(result);
+            res.send(result);
+        })
+        app.patch('/news/edit/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updateUser = req.body;
+            console.log(query);
+            const updateDoc = {
+                $set: {
+                    headline: updateUser.headline,
+                    details: updateUser.details,
+                    cover: updateUser.cover,
+                    journalist: updateUser.journalist,
+                    detailsView: updateUser.detailsView,
+                }
+            }
+            const result = await usersCollectionAllNews.updateOne(query, updateDoc);
+            console.log(result);
+            res.send(result);
+        })
+        app.patch('/news/top/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const updateUser = req.body;
+            console.log(query);
+            const updateDoc = {
+                $set: {
+                    isTopHead: updateUser.isTopHead,
+                    isTopNews: updateUser.isTopNews,
                 }
             }
             const result = await usersCollectionAllNews.updateOne(query, updateDoc);
